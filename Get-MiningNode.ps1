@@ -1,13 +1,15 @@
 
 param(
     [Parameter(Mandatory=$true)][AllowEmptyString()]
-    [String] $item,
+    [Alias("item")]
+    [String] $i,
     [Parameter(Mandatory=$true)]
-    [String] $file
+    [Alias("url","file")]
+    [String] $urlOrHTMLFile = "test.html"
 )
 
-$nodes = .\Get-HTMLTable.ps1 $file | .\Import-FFXIVMining.ps1
-$useritems = @(( $item -split "," ) | ForEach-Object{ $_.Trim() })
+$nodes = .\Get-HTMLTable.ps1 $urlOrHTMLFile | .\Import-FFXIVMining.ps1
+$useritems = @(( $i -split "," ) | ForEach-Object{ $_.Trim() })
 
 foreach( $useritem in $useritems ){
 
@@ -17,7 +19,7 @@ foreach( $useritem in $useritems ){
     foreach( $location in $nodes.keys ){
         foreach( $item in $nodes[$location] ){
             if( $item -like "*$useritem*" ){
-                [void] $result[$useritem].add( [PSCustomObject]@{ "area" = $location; "items" = $nodes[$location] }) 
+                [void] $result[$useritem].add( [PSCustomObject]@{ "area" = $location; "items" = $nodes[$location] })
                 break
             }
         }
@@ -25,10 +27,10 @@ foreach( $useritem in $useritems ){
 }
 
 $result.keys | ForEach-Object{
-   
+
     $key = $_
     $message = ""
-    
+
     if( $key -eq "" ){
         $message += "All Nodes`n"
     } else {
@@ -39,7 +41,7 @@ $result.keys | ForEach-Object{
 
     $result[$key] | Sort-Object -Property $area | ForEach-Object{
         $item = $_
-        $message += "Area: $($item.area)`n" 
+        $message += "Area: $($item.area)`n"
         $message +="Items: $($item.items)`n"
     }
 
